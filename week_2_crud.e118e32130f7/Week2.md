@@ -89,6 +89,7 @@ db.scores.find( { "score" : { $gte : 50 , $lte : 60 } } );
 ```
 
 #Inequalities on Strings
+
 Case-sensitive
 
 ```
@@ -108,6 +109,7 @@ db.users.find( { "name" : { $lte : "Q" , $gte : "F" } } );
 ```
 
 #Using regexes, $exists, $type
+
 Perl Compatible Regular Expressions (PCRE)
 
 ```
@@ -145,6 +147,7 @@ db.people.find({ "email" : { $exists : true }, "name" : { $regex : "q" } } );
 ```
 
 #Using $or
+
 Prefix Operator
 
 ```
@@ -152,6 +155,7 @@ db.people.find({ $or : [ { "name" : { $regex : "e$" } }, { "age" : { $exists : t
 ```
 
 ... means the was incomplete
+
 hit the enter key twice to return to the command prompt 
 
 ```
@@ -173,7 +177,9 @@ db.scores.find( { "score" : { $gt : 50 }, score : { $lt : 60 } } ); //Finds all 
 ```
 
 #Querying Inside Arrays
+
 Polymorphic - searches inside of strings AND arrays
+
 No recursion
 
 ```
@@ -247,9 +253,9 @@ cur.sort( { name : -1} ).limit(3); null;
 cur.sort( { name : -1} ).limit(3).skip(2); null;
 ```
 
-QUIZ
-When can you change the behavior of a cursor, by applying a sort, skip, or limit to it?
-This can be done at any point before the first document is called and before you've checked to see if it is empty
+QUIZ : When can you change the behavior of a cursor, by applying a sort, skip, or limit to it?
+
+ANSWER: This can be done at any point before the first document is called and before you've checked to see if it is empty
 
 #Counting Results
 
@@ -258,20 +264,227 @@ db.scores.count( { "type" : "exam" } );
 ```
 
 ```
-db.scores.count( { $and : [ { "type" : "essay" }, { "score" : { $gt : 90 } } ] } );
+db.scores.count( { $and : [ { "type" : "essay" }, { "score" : { $gt : 90 } } ] } ); //$and is not used that much, less performant than solution below.
 ```
 
 ```
-db.scores.count( { "type" : "essay", "score" : { "$gt" : 90 } } );
+db.scores.count( { "type" : "essay", "score" : { "$gt" : 90 } } ); //Same as above.
 ```
 
 #Wholesale Updating of a Document
 
+```
+db.people.update( { "name" : "Smith"} , { "name" : "Thompson", "salary" : 50000 } );
+```
+
+Wholesale replacement
+
+Update discards initial values, and updates the document with the properties and values supplied.
+
 #Using the $set Command
+
+$set adds or modifies a field in a document
+```
+db.people.update( { "name" : "Alice" }, { "$set" : { "age" : 30 } } ); //$set is efficient
+```
+
+$inc modifies a field in a document by incrementing it. 
+
+If the document doesn't exist, it will create a new document with the properties and values provided.
+
+```
+db.people.update( { "name" : "Alice" }, { "$inc" : { "age" : 1 } } );
+```
+
+```
+db.users.update( { "_id" : "myrnarackham"}, { "$set" : { "country" : "RU" } } );
+```
 
 #Using the $unset Command
 
+```
+db.people.update( { "name" : "Jones" }, { "$unset" : { "profession" : 1 } } );
+```
+
+```
+db.users.update( { "_id" : "jimmy" }, { "$unset" : { "interests" : [] } } );
+```
+
+```
+db.users.update( { "_id" : "jimmy" }, { "$unset" : { "interests" : 1 } } ); //Preferred answer, same result as above
+```
+
 #Using $push, $pop, $pull, $pullAll, $addToSet
+
+Operators that manipulate arrays in documents
+
+
+###### $set
+```
+db.arrays.insert( { "_id" : 0, "a" : [ 1, 2, 3, 4 ] } );
+```
+
+```
+db.arrays.update( { "_id" : 0 }, { $set : { "a.2" : 5 } } ); // $set with the property and array index location replaces the item with the specified value 
+```
+
+```
+> db.arrays.find();
+```
+
+```
+{ "_id" : 0, "a" : [ 1, 2, 5, 4 ] }
+```
+
+###### $push
+
+```
+db.arrays.update( { "_id" : 0 }, { "$push" : { "a" : 6 } } ); //pushes 6 to the end of the []
+```
+
+```
+> db.arrays.find();
+```
+
+```
+{ "_id" : 0, "a" : [ 1, 2, 5, 4, 6 ] }
+```
+
+###### $pop
+
+```
+db.arrays.update( { "_id" : 0 }, { "$pop" : { "a" : 1 } } ); //pop removes the last item in the []
+```
+
+```
+> db.arrays.find();
+```
+
+```
+{ "_id" : 0, "a" : [ 1, 2, 5, 4 ] }
+```
+
+```
+db.arrays.update( { "_id" : 0 }, { "$pop" : { "a" : -1 } } ); //-pop value removes the first item in the []
+```
+
+```
+> db.arrays.find();
+```
+
+```
+{ "_id" : 0, "a" : [ 2, 5, 4 ] }
+```
+
+###### $pushAll
+
+```
+db.arrays.update( { "_id" : 0 }, { "$pushAll" : { "a" : [ 7, 8, 9 ] } } ); //$pushAll pushes new array values to the end of the existing []
+```
+
+```
+> db.arrays.find();
+```
+
+```
+{ "_id" : 0, "a" : [ 2, 5, 4, 7, 8, 9 ] }
+```
+
+###### $pull
+
+```
+db.arrays.update( { "_id" : 0 }, { "$pull" : { "a" : 5 } } ); //$pull removes the specified item from the existing array
+```
+
+```
+> db.arrays.find();
+```
+
+```
+{ "_id" : 0, "a" : [ 2, 4, 7, 8, 9 ] }
+```
+
+###### $pullAll
+
+```
+db.arrays.update( { "_id" : 0 }, { "$pullAll" : { "a" : [ 2, 4, 8 ] } } );
+```
+
+```
+> db.arrays.find();
+```
+
+```
+{ "_id" : 0, "a" : [ 7, 9 ] }
+```
+
+###### $addToSet
+
+```
+db.arrays.update( { "_id" : 0 }, { "$addToSet" : { "a" : 5 } } );
+```
+
+```
+> db.arrays.find();
+```
+
+```
+{ "_id" : 0, "a" : [ 7, 9, 5 ] }
+```
+
+QUIZ
+
+```
+db.friends.insert( { _id : "Mike", interests : [ "chess", "botany" ] } );
+```
+
+```
+db.friends.update( { _id : "Mike" }, { $push : { interests : "skydiving" } } ); // adds skydiving to the end of the []
+```
+
+```
+> db.friends.find();
+```
+
+```
+{ "_id" : "Mike", "interests" : [ "chess", "botany", "skydiving" ] }
+```
+
+```
+db.friends.update( { _id : "Mike" }, { $pop : { interests : -1 } } ); // removes chess from the beginning of the []
+```
+
+```
+> db.friends.find();
+```
+
+```
+{ "_id" : "Mike", "interests" : [ "botany", "skydiving" ] }
+```
+
+```
+db.friends.update( { _id : "Mike" }, { $addToSet : { interests : "skydiving" } } ); // no change
+```
+
+```
+> db.friends.find();
+```
+
+```
+{ "_id" : "Mike", "interests" : [ "botany", "skydiving" ] }
+```
+
+```
+db.friends.update( { _id : "Mike" }, { $pushAll: { interests : [ "skydiving" , "skiing" ] } } ); // pushes skydiving and skiing to the end of the [], adding skydiving again to the array
+```
+
+```
+> db.friends.find();
+```
+
+```
+{ "_id" : "Mike", "interests" : [ "botany", "skydiving", "skydiving", "skiing" ] }
+```
 
 #Upserts
 
