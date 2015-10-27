@@ -32,9 +32,17 @@ QUIZ 1: By the end of this week, you'll know which of the following?
 
 [Binary JSON](http://www.bsonspec.org) - Superset of JSON
 
+```
 NumberInt()
+```
+
+```
 NumberLong()
+```
+
+```
 newDate() Returns ISODate("2015-10-26T06:44:38.786Z")
+```
 
 QUIZ 3 : Which of the following are types available in BSON?
 
@@ -50,75 +58,212 @@ ObjectId - Is intended to be a global unique identifier.
 
 #Introduction to findOne
 
+```
 db.people.findOne()
+```
 
 #Introduction to find
+
+```
 db.people.find()
+```
 
 #Querying Using field Selection
+
+```
 db.scores.find( { "student" : 19, "type" : "essay" } );
+```
+
+```
 db.scores.find( { "score" : 50, "type" : "essay" }, { "student" : true, "_id": false } );
+```
 
 #Querying Using $gt and $lt
+
+```
 db.scores.find( { "score" : { $gt : 95, $lte : 98 }, "type" : "essay" } );
+```
+
+```
 db.scores.find( { "score" : { $gte : 50 , $lte : 60 } } ); 
+```
 
 #Inequalities on Strings
-db.people.find( { "name" : { $lt : "D" } } );
-db.people.find( { "name" : { $lt : "D", $gt : "B" } } );
-
-db.users.find( { "name" : { $gte : "F" , $lte : "Q" } } );
-db.users.find( { "name" : { $lte : "Q" , $gte : "F" } } );
 Case-sensitive
 
+```
+db.people.find( { "name" : { $lt : "D" } } );
+```
+
+```
+db.people.find( { "name" : { $lt : "D", $gt : "B" } } );
+```
+
+```
+db.users.find( { "name" : { $gte : "F" , $lte : "Q" } } );
+```
+
+```
+db.users.find( { "name" : { $lte : "Q" , $gte : "F" } } );
+```
+
 #Using regexes, $exists, $type
-libpcre
- db.people.find( { "profession" : { $exists : true } } );
+Perl Compatible Regular Expressions (PCRE)
+
+```
+db.people.find( { "profession" : { $exists : true } } );
 { "_id" : ObjectId("562e4e420235e91c73761862"), "name" : "Jones", "age" : 35, "profession" : "baker" }
 { "_id" : ObjectId("562eb7aa726e87b25dcb9180"), "name" : "Smith", "age" : 30, "profession" : "hacker" }
+```
 
+```
 db.people.find( { "name" : { $type : 2 } } ); //finds strings per BSON spec
-db.people.find( { "name" : { $regex : "a" } } ); //finds documents with "a" in them
-db.people.find( { "name" : { $regex : "e$" } } ); //finds documents ending in "e"
-db.people.find( { "name" : { $regex : "^A" } } ); //finds strings starting with "A"
+```
 
+```
+db.people.find( { "name" : { $regex : "a" } } ); //finds documents with "a" in them
+```
+
+```
+db.people.find( { "name" : { $regex : "e$" } } ); //finds documents ending in "e"
+```
+
+```
+db.people.find( { "name" : { $regex : "^A" } } ); //finds strings starting with "A"
+```
+
+```
 db.people.find( { "name" : { $regex : "q" } } );
+```
+
+```
 db.people.find( { "email" : { $exists : true } } );
+```
+
+```
 db.people.find({ "email" : { $exists : true }, "name" : { $regex : "q" } } );
+```
 
 #Using $or
 Prefix Operator
-  db.people.find({ $or : [ { "name" : { $regex : "e$" } }, { "age" : { $exists : true } } ] } );
+
+```
+db.people.find({ $or : [ { "name" : { $regex : "e$" } }, { "age" : { $exists : true } } ] } );
+```
 
 ... means the was incomplete
 hit the enter key twice to return to the command prompt 
 
+```
 db.scores.find( { $or : [ { "score" : { $lt : 50 } }, { "score" : { $gt : 90 } } ] } ) ;
+```
 
 #Using $and
-db.people.find( { $and : [ { "name" : { $gt : "C" } }, { "name" : { $regex : "a" } } ] } );
-db.people.find( { "name" : { $gt : "C", $regex : "a" } } ); //Same as above, but more performant
 
+```
+db.people.find( { $and : [ { "name" : { $gt : "C" } }, { "name" : { $regex : "a" } } ] } );
+```
+
+```
+db.people.find( { "name" : { $gt : "C", $regex : "a" } } ); //Same as above, but more performant
+```
+
+```
 db.scores.find( { "score" : { $gt : 50 }, score : { $lt : 60 } } ); //Finds all documents with a score < 60
+```
 
 #Querying Inside Arrays
 Polymorphic - searches inside of strings AND arrays
 No recursion
+
+```
 db.accounts.find( { "favorites" : "pretzels" } );
+```
+
+```
 db.accounts.find( { "favorites" : "beer", "name" : { $gt : "H" } } );
+```
 
 #Using $in and $all
+```
 db.accounts.find( { "favorites" : { $all : [ "beer" , "pretzels" ] } } );
+```
+
+```
 db.accounts.find( { "name" : { $in : [ "Howard", "John" ] } } );
+```
+
+```
 db.users.find( { "friends" : { $all : [ "Joe", "Bob"] }, "favorites" : { $in : [ "running", "pickles" ] } } );
+```
 
 #Queries with Dot Notation
+```
 db.users.find( { "email.work" : "dave@dave.com" } );
+```
+
+```
 db.catalog.find( { "price" : { "$gt" : 10000 } , "reviews.rating" : { "$gte" : 5 } } );
+```
 
 #Querying, Cursors
+```
+db.people.find();
+```
+
+```
+cur = db.people.find(); null; 
+```
+
+```
+cur.hasNext(); //Returns true
+```
+
+```
+cur.next(); //Returns the next document
+```
+
+```
+while (cur.hasNext()) printjson(cur.next());
+```
+
+```
+cur = db.people.find(); null; 
+```
+
+```
+cur.limit(5); null;
+```
+
+```
+cur.sort( { name : -1} ); null;
+```
+
+```
+cur.sort( { name : -1} ).limit(3); null;
+```
+
+```
+cur.sort( { name : -1} ).limit(3).skip(2); null;
+```
+
+QUIZ
+When can you change the behavior of a cursor, by applying a sort, skip, or limit to it?
+This can be done at any point before the first document is called and before you've checked to see if it is empty
 
 #Counting Results
+
+```
+db.scores.count( { "type" : "exam" } ); 
+```
+
+```
+db.scores.count( { $and : [ { "type" : "essay" }, { "score" : { $gt : 90 } } ] } );
+```
+
+```
+db.scores.count( { "type" : "essay", "score" : { "$gt" : 90 } } );
+```
 
 #Wholesale Updating of a Document
 
